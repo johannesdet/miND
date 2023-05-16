@@ -17,7 +17,7 @@ speciesData:
   Homo sapiens:
     genomeID: GRCh38
     code: hsa
-    genomeVersion: p13
+    genomeVersion: p12
     txid: '9606'
   Mus musculus:
     genomeID: GRCm39

@@ -1,6 +1,12 @@
 import pandas as pd
 import pathlib
 
+# change settings for xlrd to work with xlsx files in the pd.read_excel call
+import xlrd
+xlrd.xlsx.ensure_elementtree_imported(False, None)
+xlrd.xlsx.Element_has_iter = True
+
+
 configfile: "config.yaml"
 
 sampleSheet = config['sampleSheet']
@@ -47,6 +53,20 @@ else:
 
 if('Significance level' in xlsConfig and isinstance(xlsConfig['Significance level'], str)): config['alpha'] = xlsConfig['Significance level']
 else: config['alpha'] = "0.05"
+
+if('Spikein lot' in xlsConfig and isinstance(xlsConfig['Spikein lot'], str)): config['spikeInLot'] = xlsConfig['Spikein lot']
+else: config['spikeInLot'] = ""
+
+if(xlsConfig['Spikein analysis'] != "No"):
+    config['includeSpikeIns'] = 1
+    config['spikeInVersion'] = xlsConfig['Spikein analysis']
+else:
+    config['includeSpikeIns'] = 0
+
+if(xlsConfig['Report spikein sequences'] == "Yes"):
+    config['includeSequence'] = 1
+else:
+    config['includeSequence'] = 0
 
 if(xlsConfig['Adapter'] == "Illumina Universal Adapter"):
     config['adapter'] = "-a IlluminaUniversal=AGATCGGAAGAG"
@@ -217,7 +237,8 @@ rule combineSampleMappingStats:
     conda:  "envs/ranalysis.yml"
     threads: 1
     shell:
-        "sleep 3 && Rscript scripts/combineSampleMappingStats.R --outFile='{output}' --includeSpikeIns=0 --input.miRNA='{input.miRNA}' --input.spikeins='{input.spikeins}' 2> {log}"
+        "sleep 3 && Rscript scripts/combineSampleMappingStats.R --outFile='{output}' --includeSpikeIns={config[includeSpikeIns]} --input.miRNA='{input.miRNA}' --input.spikeins='{input.spikeins}' 2> {log}"
+
 
 rule combineAllMappingStats:
     input:  csv = expand("%s/analysis_sampleMappingStats/{filename}.csv" % outPath, filename=IDS),
@@ -230,7 +251,7 @@ rule combineAllMappingStats:
     conda:  "envs/ranalysis.yml"
     threads: 1
     shell:
-        "sleep 3 && Rscript scripts/combineAllMappingStats.R --outFile='{output.csv}' --includeSequence=0  --sampleSheetFile='{input.sampleSheetFile}' {input.csv} 2> {log}"
+        "sleep 3 && Rscript scripts/combineAllMappingStats.R --outFile='{output.csv}' --includeSequence={config[includeSequence]}  --sampleSheetFile='{input.sampleSheetFile}' {input.csv} 2> {log}"
 
 rule sortBowtieMapping:
     input: "%s/{mapping}/{filename}.map" % outPath
