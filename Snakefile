@@ -266,7 +266,7 @@ rule mappingBowtieSpikeIns:
     output: map = "%s/mapping_bowtie_spikeins/{filename}.map" % outPath,
     #        mapped = temp("%s/mapping_bowtie_spikeins/{filename}.mapped.fasta" % outPath),
             unmapped = temp("%s/mapping_bowtie_spikeins/{filename}.unmapped.fasta" % outPath)
-    threads: config['threads']['medium']
+    threads: config['threads']['high']
     log:    "%s/logs/mapping_bowtie_spikeins/{filename}.log" % outPath
     conda:
         "envs/bowtie1.yml"
@@ -283,7 +283,7 @@ rule mappingBowtieGenome:
             unmappedSeqSizeDist = "%s/mapping_bowtie_genome/{filename}.unmapped.ssd" % outPath
     log:    "%s/logs/mapping_bowtie_genome/{filename}.log" % outPath
     conda:  "envs/bowtie1.yml"
-    threads: config['threads']['medium']
+    threads: config['threads']['high']
     shell:
         """
             bowtie --threads {threads} -f -k1 -v2 --fullref --un '{output.unmapped}' --al '{output.mapped}' {config[repoPath]}/{config[genomeID]}/{config[genomeVersion]}/bowtiedb/genome '{input}' > '{output.map}' 2> {log}
@@ -296,7 +296,7 @@ rule mappingBowtieMirna:
     output: map = "%s/mapping_bowtie_mirna/{filename}.map" % outPath,
             # mapped = temp("%s/mapping_bowtie_mirna/{filename}.mapped.fasta" % outPath),
             unmapped = temp("%s/mapping_bowtie_mirna/{filename}.unmapped.fasta" % outPath)
-    threads: config['threads']['medium']
+    threads: config['threads']['high']
     log:    "%s/logs/mapping_bowtie_mirna/{filename}.log" % outPath
     conda:
         "envs/bowtie1.yml"
@@ -308,7 +308,7 @@ rule mappingBowtieRNAcentral:
     output: map = "%s/mapping_bowtie_rnacentral/{filename}.map" % outPath,
             # mapped = temp("%s/mapping_bowtie_rnacentral/{filename}.mapped.fasta" % outPath),
             unmapped = temp("%s/mapping_bowtie_rnacentral/{filename}.unmapped.fasta" % outPath)
-    threads: config['threads']['medium']
+    threads: config['threads']['high']
     log:    "%s/logs/mapping_bowtie_rnacentral/{filename}.log" % outPath
     conda:
         "envs/bowtie1.yml"
@@ -379,7 +379,7 @@ rule mappingBBDukSpikeInsCore:
     conda:
         "envs/bbmap.yml"
     shell:
-        "bbduk.sh threads={threads} -Xmx12g in='{input}' outm=stdout.fq ref='libs/spikeins/spikeins_core.fa' stats='{output.stats}' statscolumns=5 k=13 maskmiddle=f rcomp=f hdist=0 edist=0 rename=t > /dev/null 2> {log}"
+        "bbduk.sh threads={threads} -Xmx1024m in='{input}' outm=stdout.fq ref='libs/spikeins/spikeins_core.fa' stats='{output.stats}' statscolumns=5 k=13 maskmiddle=f rcomp=f hdist=0 edist=0 rename=t > /dev/null 2> {log}"
 
 rule mappingBBDukSpikeIns:
     input:  "%s/fastq_trimmed/{filename}.fastq" % outPath
@@ -390,7 +390,7 @@ rule mappingBBDukSpikeIns:
     conda:
         "envs/bbmap.yml"
     shell:
-        "bbduk.sh threads={threads} -Xmx12g in='{input}' outm=stdout.fq ref='libs/spikeins/spikeins.fa' stats='{output.stats}' statscolumns=5 k=21 maskmiddle=f rcomp=f hdist=0 edist=0 rename=t > /dev/null 2> {log}"
+        "bbduk.sh threads={threads} -Xmx1024m in='{input}' outm=stdout.fq ref='libs/spikeins/spikeins.fa' stats='{output.stats}' statscolumns=5 k=21 maskmiddle=f rcomp=f hdist=0 edist=0 rename=t > /dev/null 2> {log}"
 
 rule filterCollapsedReads:
     input: "%s/fastq_collapsed/{filename}.fastq" % outPath
